@@ -5,20 +5,33 @@
     <title>Project 2 - {{ $title }}</title>
     <meta name="description" content="Web Technologies Project 2">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link 
+    <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-        rel="stylesheet" 
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
 </head>
 <body>
-    <nav class="navbar bg-primary mb-3" data-bs-theme="dark">
-        <header class="container">
-            <a class="navbar-brand" href="#">Project 2 - {{ $title }}</a>
-        </header>
+    <nav>
+        @if(Auth::check())
+            <li class="nav-item">
+                <a class="nav-link" href="/authors">Authors</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log out</a>
+            </li>
+	    <li class="nav-item">
+  		<a class="nav-link" href="/books">Books</a>
+	    </li>
+        @else
+            <li class="nav-item">
+                <a class="nav-link" href="/login">Authenticate</a>
+            </li>
+        @endif
     </nav>
+
     <main class="container">
-        <div class="row">
+         <div class="row">
             <div class="col">
                 @yield('content') <!-- Dynamic Content -->
             </div>
@@ -33,6 +46,9 @@
             </div>
         </div>
     </footer>
+    <script src="/js/admin.js"></script>
 </body>
 </html>
+
+
 
