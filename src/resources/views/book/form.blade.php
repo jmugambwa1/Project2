@@ -8,7 +8,8 @@
 
     <form
         method="post"
-        action="{{ $book->exists ? '/books/patch/' . $book->id : '/books/put' }}">
+        action="{{ $book->exists ? '/books/patch/' . $book->id : '/books/put' }}"
+        enctype="multipart/form-data">
         @csrf
 
         <div class="mb-3">
@@ -89,13 +90,31 @@
         </div>
 
         <div class="mb-3">
+            <label for="book-image" class="form-label">Image</label>
+            @if ($book->image)
+                <img
+                    src="{{ asset('images/' . $book->image) }}"
+                    class="img-fluid img-thumbnail d-block mb-2"
+                    alt="{{ $book->name }}">
+            @endif
+            <input
+                type="file" accept="image/png, image/webp, image/jpeg"
+                id="book-image"
+                name="image"
+                class="form-control @error('image') is-invalid @enderror">
+            @error('image')
+                <p class="invalid-feedback">{{ $errors->first('image') }}</p>
+            @enderror
+        </div>
+
+        <div class="mb-3">
             <div class="form-check">
                 <input
                     type="checkbox"
                     id="book-display"
                     name="display"
                     value="1"
-                    class="form-check-input @error('display') is-invalid @enderror" 
+                    class="form-check-input @error('display') is-invalid @enderror"
                     @if (old('display', $book->display)) checked @endif>
                 <label class="form-check-label" for="book-display">Publish</label>
                 @error('display')
@@ -109,4 +128,5 @@
         </button>
     </form>
 @endsection
+
 
