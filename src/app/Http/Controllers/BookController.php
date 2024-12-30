@@ -8,10 +8,11 @@ use App\Models\Book;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Http\Requests\BookRequest;
 
 class BookController extends Controller implements HasMiddleware
 {
-    // call auth middleware
+    // Call auth middleware
     public static function middleware(): array
     {
         return [
@@ -19,125 +20,83 @@ class BookController extends Controller implements HasMiddleware
         ];
     }
 
-    // display all Books
+    // Display all books
     public function list(): View
     {
-	$items = Book::orderBy('name', 'asc')->get();
-	return view(
-	    'book.list',
-	    [
-		'title' => 'Books',
-		'items' => $items
-	    ]
-	);
+        $items = Book::orderBy('name', 'asc')->get();
+        return view('book.list', [
+            'title' => 'Books',
+            'items' => $items,
+        ]);
     }
 
-    // display new Book form
+    // Display new book form
     public function create(): View
     {
-	$authors = Author::orderBy('name', 'asc')->get();
-	return view(
-	    'book.form',
-	    [
-		'title' => 'Add new book',
-		'book' => new Book(),
-		'authors' => $authors,
-	    ]
-	);
+        $authors = Author::orderBy('name', 'asc')->get();
+        return view('book.form', [
+            'title' => 'Add new book',
+            'book' => new Book(),
+            'authors' => $authors,
+        ]);
     }
 
-    // create new Book entry
-    public function put(Request $request): RedirectResponse
+    // Validate and save Book data
+    private function saveBookData(Book $book,BookRequest $request)
     {
-	$validatedData = $request->validate([
-	    'name' => 'required|min:3|max:256',
-	    'author_id' => 'required',
-	    'description' => 'nullable',
-	    'price' => 'nullable|numeric',
-	    'year' => 'numeric',
-	    'image' => 'nullable|image',
-	    'display' => 'nullable',
-	]);
-	$book = new Book();
-	$book->name = $validatedData['name'];
-	$book->author_id = $validatedData['author_id'];
-	$book->description = $validatedData['description'];
-	$book->price = $validatedData['price'];
-	$book->year = $validatedData['year'];
-	$book->display = (bool) ($validatedData['display'] ?? false);
+        $validatedData = $request->validate();
 
-	if ($request->hasFile('image')) {
-	    // here you can add code that deletes old image file when new one is uploaded
-	    $uploadedFile = $request->file('image');
-	    $extension = $uploadedFile->clientExtension();
-	    $name = uniqid();
-	    $book->image =  $uploadedFile->storePubliclyAs(
-		'/',
-		$name . '.' . $extension,
-		'uploads'
-	    );
-	}
-	$book->save();
-	return redirect('/books');
+        $book->fill($validatedData);
+        $book->display = (bool) ($validatedData['display'] ?? false);
+
+        if ($request->hasFile('image')) {
+            // Here you can add code that deletes old image file when a new one is uploaded
+            $uploadedFile = $request->file('image');
+            $extension = $uploadedFile->clientExtension();
+            $name = uniqid();
+            $book->image = $uploadedFile->storePubliclyAs(
+                '/',
+                $name . '.' . $extension,
+                'uploads'
+            );
+        }
+        $book->save();
     }
 
-    // display Book edit form
+    // Create a new book entry
+    public function put(BookRequest $request): RedirectResponse
+    {
+        $book = new Book();
+        $this->saveBookData($book, $request);
+        return redirect('/books');
+    }
+
+    // Update book data
+    public function patch(Book $book,BookRequest $request): RedirectResponse
+    {
+        $this->saveBookData($book, $request);
+        return redirect('/books/update/' . $book->id);
+    }
+
+    // Display book edit form
     public function update(Book $book): View
     {
-	$authors = Author::orderBy('name', 'asc')->get();
-	return view(
-	    'book.form',
-	    [
-		'title' => 'Rediget gramatu',
-		'book' => $book,
-		'authors' => $authors,
-	    ]
-	);
+        $authors = Author::orderBy('name', 'asc')->get();
+        return view('book.form', [
+            'title' => 'Edit Book',
+            'book' => $book,
+            'authors' => $authors,
+        ]);
     }
 
-    // update Book data
-    public function patch(Book $book, Request $request): RedirectResponse
-    {
-        $validatedData = $request->validate([
-	    'name' => 'required|min:3|max:256',
-	    'author_id' => 'required',
-	    'description' => 'nullable',
-	    'price' => 'nullable|numeric',
-	    'year' => 'numeric',
-	    'image' => 'nullable|image',
-	    'display' => 'nullable',
-	]);
-	$book->name = $validatedData['name'];
-	$book->author_id = $validatedData['author_id'];
-	$book->description = $validatedData['description'];
-	$book->price = $validatedData['price'];
-	$book->year = $validatedData['year'];
-	$book->display = (bool) ($validatedData['display'] ?? false);
-
-	if ($request->hasFile('image')) {
-	    // here you can add code that deletes old image file when new one is uploaded
-	    $uploadedFile = $request->file('image');
-	    $extension = $uploadedFile->clientExtension();
-	    $name = uniqid();
-	    $book->image =  $uploadedFile->storePubliclyAs(
-		'/',
-		$name . '.' . $extension,
-		'uploads'
-	    );
-	}
-	$book->save();
-	return redirect('/books')->with('Book updated successfully!');
-    }
-
-    // delete Book
+    // Delete a book
     public function delete(Book $book): RedirectResponse
     {
-
-	if ($book->image) {
-	    unlink(getcwd() . '/images/' . $book->image);
-	}
-	 // delete the image file too
-	$book->delete();
-	return redirect('/books');
+        if ($book->image) {
+            unlink(storage_path('app/public/' . $book->image));
+        }
+        $book->delete();
+        return redirect('/books');
     }
 }
+
