@@ -10,6 +10,7 @@
                 <th>ID</th>
                 <th>Name</th>
                 <th>Author</th>
+                <th>Genre</th>
                 <th>Year</th>
                 <th>Price</th>
                 <th>Published</th>
@@ -22,6 +23,7 @@
                     <td>{{ $book->id }}</td>
                     <td>{{ $book->name }}</td>
                     <td>{{ $book->author->name }}</td>
+                    <td>{{ $book->genre->name ?? 'N/A' }}</td>
                     <td>{{ $book->year }}</td>
                     <td>&euro; {{ number_format($book->price, 2, '.') }}</td>
                     <td>{!! $book->display ? '&#x2714;' : '&#x274C;' !!}</td>
@@ -54,5 +56,6 @@
 <a href="/books/create" class="btn btn-primary">Add new book</a>
 
 @endsection
+
 
 

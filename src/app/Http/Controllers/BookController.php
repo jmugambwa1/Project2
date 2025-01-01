@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Author;
 use App\Models\Book;
+use App\Models\Genre;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -34,19 +35,25 @@ class BookController extends Controller implements HasMiddleware
     public function create(): View
     {
         $authors = Author::orderBy('name', 'asc')->get();
-        return view('book.form', [
-            'title' => 'Add new book',
-            'book' => new Book(),
-            'authors' => $authors,
-        ]);
+        $genres = Genre::orderBy('name', 'asc')->get();
+        return view(
+            'book.form',
+            [
+                'title' => 'Add new book',
+                'book' => new Book(),
+                'authors' => $authors,
+                'genres' => $genres,
+            ]
+        );
     }
 
     // Validate and save Book data
     private function saveBookData(Book $book,BookRequest $request)
     {
-        $validatedData = $request->validate();
+        $validatedData = $request->validated();
 
         $book->fill($validatedData);
+	$book->genre_id = $validatedData['genre_id'];
         $book->display = (bool) ($validatedData['display'] ?? false);
 
         if ($request->hasFile('image')) {
@@ -75,18 +82,23 @@ class BookController extends Controller implements HasMiddleware
     public function patch(Book $book,BookRequest $request): RedirectResponse
     {
         $this->saveBookData($book, $request);
-        return redirect('/books/update/' . $book->id);
+        return redirect('/books')->with('success', 'Book updated successfully!');
     }
 
     // Display book edit form
     public function update(Book $book): View
     {
         $authors = Author::orderBy('name', 'asc')->get();
-        return view('book.form', [
-            'title' => 'Edit Book',
-            'book' => $book,
-            'authors' => $authors,
-        ]);
+        $genres = Genre::orderBy('name', 'asc')->get();
+        return view(
+            'book.form',
+            [
+                'title' => 'Edit book',
+                'book' => $book,
+                'authors' => $authors,
+                'genres' => $genres,
+            ]
+        );
     }
 
     // Delete a book
