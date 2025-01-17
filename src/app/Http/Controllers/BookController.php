@@ -104,11 +104,12 @@ class BookController extends Controller implements HasMiddleware
     // Delete a book
     public function delete(Book $book): RedirectResponse
     {
-        if ($book->image) {
+        if ($book->image && file_exists(storage_path('app/public/' . $book->image))) {
             unlink(storage_path('app/public/' . $book->image));
         }
         $book->delete();
         return redirect('/books');
     }
+
 }
 

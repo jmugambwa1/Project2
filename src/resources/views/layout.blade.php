@@ -12,23 +12,28 @@
         crossorigin="anonymous">
 </head>
 <body>
-    <nav>
-        @if(Auth::check())
-            <li class="nav-item">
-                <a class="nav-link" href="/authors">Authors</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/logout">Log out</a>
-            </li>
-	    <li class="nav-item">
-  		<a class="nav-link" href="/books">Books</a>
-	    </li>
-        @else
-            <li class="nav-item">
-                <a class="nav-link" href="/login">Authenticate</a>
-            </li>
-        @endif
-    </nav>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            @if(Auth::check())
+                <li class="nav-item">
+                    <a class="nav-link" href="/authors">Authors</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/books">Books</a>
+                </li>
+            @else
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Authenticate</a>
+                </li>
+            @endif
+        </ul>
+    </div>
+  </nav>
+
 
     <main class="container">
          <div class="row">
